@@ -44,7 +44,7 @@ scene("game", ({ level, score }) => {
             '                                   ',
             '                                   ',
             '                                   ',
-            '     %  =%=%=                      ',
+            '     %  =*=%=                      ',
             '                                   ',
             '                         -+        ',
             '                ^  ^     ()        ',
@@ -55,18 +55,30 @@ scene("game", ({ level, score }) => {
             '~                                   ~',
             '~                                   ~',
             '~                                   ~',
-            '~       @@@@@@               x      ~',
+            '~       @@@*@@               x      ~',
             '~                         x  x      ~',
             '~                      x  x  x    -+~',
             '~             z  z   x x  x  x    ()~',
             '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        ],
+        [
+            '                                      ',
+            '                                      ',
+            '                                      ',
+            '                                      ',
+            '                                      ',
+            '           %%   =*=%=                 ',
+            '                                      ',
+            '                                    -+',
+            '        ^        ^ ^   ^            ()',
+            '=================================   ==',
         ]
     ]
 
     const levelCfg = {
         width: 20,
         height: 20,
-        '=': [sprite('block', solid())],
+        '=': [sprite('block'), solid()],
         '$': [sprite('coin'), 'coin'],
         '%': [sprite('surprise'), solid(), 'coin-surprise'],
         '*': [sprite('surprise'), solid(), 'mushroom-surprise'],
@@ -87,15 +99,15 @@ scene("game", ({ level, score }) => {
     const gameLevel = addLevel(maps[level], levelCfg);
 
     const scoreLabel = add([
-        text(score),
-        pos(30, 6),
+        text('Score: ' + score),
+        pos(40, 20),
         layer('ui'),
         {
             value: score,
         }
     ])
 
-    add([text('level ' + parseInt(level + 1) + pos(40, 6))]);
+    add([text('Level ' + parseInt(level + 1)), pos(40, 6)]);
 
     function big() {
         let timer = 0
@@ -152,21 +164,44 @@ scene("game", ({ level, score }) => {
         }
     })
 
-
     player.collides('mushroom', (m) => {
         destroy(m)
         player.biggify(6)
     })
 
-
     player.collides('coin', (c) => {
         destroy(c)
         scoreLabel.value++
-        scoreLabel.text = scoreLabel.value
+        scoreLabel.text = 'Score: ' + scoreLabel.value
     })
 
     action('dangerous', (d) => {
         d.move(-ENEMY_SPEED, 0)
+    })
+
+    player.collides('dangerous', (d) => {
+        console.log("isJumping: ", isJumping.toString());
+        if (isJumping === true) {
+            destroy(d)
+        } else {
+            go('lose', { score: scoreLabel.value })
+        }
+    })
+
+    player.action(() => {
+        camPos(player.pos)
+        if (player.pos.y >= FALL_DEATH) {
+            go('lose', { score: scoreLabel.value })
+        }
+    })
+
+    player.collides('pipe', () => {
+        keyPress('down', () => {
+            go('game', {
+                level: (level + 1) % maps.length,
+                score: scoreLabel.value
+            })
+        })
     })
 
 
@@ -179,16 +214,16 @@ scene("game", ({ level, score }) => {
     })
 
 
+
     player.action(() => {
         if (player.grounded()) {
             isJumping = false
         }
     })
 
-
-
     keyPress('space', () => {
         if (player.grounded()) {
+            isJumping = true;
             player.jump(CURRENT_JUMP_FORCE)
         }
     })
@@ -198,7 +233,7 @@ scene("game", ({ level, score }) => {
 
 
 scene('lose', ({ score }) => {
-    add([text(score, 32), origin('center'), pos(width() / 2), height() / 2]);
+    add([text('Game over! Score: ' + score, 32), origin('center'), pos(width() / 2, height() / 2)])
 })
 
 
