@@ -100,14 +100,19 @@ scene("game", ({ level, score }) => {
 
     const scoreLabel = add([
         text('Score: ' + score),
-        pos(40, 20),
+        pos(40, 10),
         layer('ui'),
         {
             value: score,
         }
     ])
 
-    add([text('Level ' + parseInt(level + 1)), pos(40, 6)]);
+    add([text('Level ' + parseInt(level + 1)), pos(40, 0)]);
+
+    add([text('Move: left/right arrow'), pos(40, 30)]);
+    add([text('Jump: spacebar'), pos(40, 40)]);
+    add([text('Enter pipe: arrow down'), pos(40, 50)]);
+
 
     function big() {
         let timer = 0
